@@ -1,8 +1,104 @@
 # Agent 间数据协议
 
-**版本**: 1.0  
+**版本**: 1.1  
 **状态**: 已发布（Phase 0 前置交付）  
 **维护者**: Lead
+
+---
+
+## 零、输入摄取层输出格式（Explorer前置依赖）
+
+输入摄取层是纯工具层，**不写入 runtime 文件系统**，而是直接返回结构化数据给 Explorer 调用。所有格式约定如下：
+
+### 0.1 SourceBundle统一入口
+
+**位置**: `ingest/__init__.py` 的 `load_source_bundle()`
+
+```python
+@dataclass
+class SourceBundle:
+    """输入摄取层的统一输出，给Explorer使用。"""
+    paper: PaperContent | None      # 论文内容，若无则None
+    notes: list[NoteContent]        # 笔记列表
+    assets: AssetList               # 参考资产清单
+    env_report: EnvReport           # 环境检测报告
+```
+
+---
+
+### 0.2 PaperContent（PDF解析输出）
+
+```python
+@dataclass
+class PaperContent:
+    path: str                       # 原始PDF路径
+    exists: bool                    # 文件是否存在
+    text: str | None                # 全文本（包括公式LaTeX）
+    extracted_at: datetime          # 提取时间
+    parse_warnings: list[str]       # 解析警告（如编码问题、公式可能混排）
+```
+
+---
+
+### 0.3 NoteContent（Markdown笔记输出）
+
+```python
+@dataclass
+class NoteContent:
+    path: str                       # 原始笔记路径
+    title: str | None               # 标题（来自YAML front matter或文件名）
+    front_matter: dict[str, Any]    # YAML front matter内容
+    body_text: str                  # 正文文本
+    images: list[str]               # 笔记中引用的图片路径
+```
+
+---
+
+### 0.4 AssetList（参考资产扫描输出）
+
+```python
+@dataclass
+class AssetList:
+    scanned_at: datetime
+    components: list[ComponentInfo] # 可用组件（HyperFrames、HTML模板等）
+    manim_assets: list[str]         # Manim参考脚本
+    references: list[str]           # 其他参考文档
+```
+
+```python
+@dataclass
+class ComponentInfo:
+    path: str
+    name: str
+    category: str                   # "html_template" / "manim_script" / "svg_asset" / "other"
+    description: str | None
+```
+
+---
+
+### 0.5 EnvReport（环境检测输出）
+
+```python
+@dataclass
+class EnvReport:
+    generated_at: datetime
+    python: ToolCheckResult
+    node: ToolCheckResult
+    manim: ToolCheckResult
+    ffmpeg: ToolCheckResult
+    overall_status: "ok" | "warning" | "error"
+    warnings: list[str]
+```
+
+```python
+@dataclass
+class ToolCheckResult:
+    name: str
+    available: bool
+    version: str | None
+    path: str | None
+    details: str | None
+```
 
 ---
 
@@ -18,14 +114,24 @@
 ## 二、数据流总览
 
 ```
-SourceBundle (manifest)
+manifest
+  (paper_path, note_paths)
         │
         ▼
-┌─────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────┐
+│  输入摄取层 (纯工具，不写runtime)                            │
+│  ingest/pdf_reader.py, ingest/markdown_reader.py             │
+│  ingest/asset_scanner.py, ingest/env_reporter.py             │
+│                                                              │
+│  输出: SourceBundle (Python dataclass，内存传递给Explorer)    │
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+                           ▼
+┌──────────────────────────────────────────────────────────────┐
 │  Explorer (read_only)                                       │
-│                                                             │
+│                                                              │
 │  阶段: PRESTART → INGEST → SUMMARIZE → PLAN                 │
-│                                                             │
+│                                                              │
 │  产出 → runtime/sessions/<session_id>/explorer-findings/    │
 │          ├── research-summary-draft.json                    │
 │          ├── glossary-draft.json                            │
