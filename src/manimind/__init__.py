@@ -1,6 +1,7 @@
 """ManiMind 编排层包导出。"""
 
 from .agents.base import BaseAgent, LlmClientProtocol
+from .agents.coordinator import CoordinatorAgent
 from .bootstrap import build_runtime_layout, sanitize_identifier
 from .context_assembly import (
     PromptSection,
@@ -36,6 +37,7 @@ from .workflow import build_project_plan
 __all__ = [
     "AgentProfile",
     "BaseAgent",
+    "CoordinatorAgent",
     "ExecutionTask",
     "LlmClientProtocol",
     "PipelineStage",
