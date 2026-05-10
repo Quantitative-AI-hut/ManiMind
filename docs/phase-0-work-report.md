@@ -1,6 +1,6 @@
 # Phase 0 前置准备工作报告
 
-**日期**: 2026-05-09  
+**日期**: 2026-05-10  
 **执行角色**: Lead  
 **阶段**: Phase 0 — 前置准备  
 **状态**: 已完成
@@ -14,6 +14,7 @@
 | L1 | 定义 BaseAgent 抽象基类 | `src/manimind/agents/base.py` | 已完成 |
 | L2 | 定义 Agent 间数据协议 | `docs/agent-data-protocol.md` | 已完成 |
 | L3 | 创建目录结构 + __init__.py | 5 个新包目录 | 已完成 |
+| L2.1 | 补充输入摄取层输出格式 | `docs/agent-data-protocol.md` v1.1 | 已完成（补充） |
 
 ---
 
@@ -52,22 +53,25 @@ class BaseAgent(ABC):
 
 ## L2: Agent 间数据协议
 
-**文件**: `docs/agent-data-protocol.md` (~260 行)
+**文件**: `docs/agent-data-protocol.md` (~360 行)  
+**版本**: v1.0 → v1.1
 
 ### 文档结构
 
-1. **核心原则** — 文件系统交换、短期/长期上下文分离、审计日志
-2. **数据流总览** — ASCII 图展示 Explorer → Planner → Coordinator 完整链路
-3. **文件路径约定** — 短期/长期上下文的目录结构和命名规则
-4. **Explorer 产出格式** — 研究总结、术语表、公式目录的 JSON Schema
-5. **Planner 产出格式** — 约束分析、分镜建议的 JSON Schema
-6. **Coordinator 产出格式** — 讲解脚本、分镜主表、会话交接的 JSON Schema
-7. **通用信封格式** — 所有上下文文件的统一封装结构
-8. **优雅降级规则** — PDF 缺失、LLM 不可用等场景的处理方式
-9. **版本兼容性** — 向前兼容策略
+1. **输入摄取层输出格式** — SourceBundle统一入口、PaperContent、NoteContent、AssetList、EnvReport（新增）
+2. **核心原则** — 文件系统交换、短期/长期上下文分离、审计日志
+3. **数据流总览** — ASCII图展示 输入摄取层 → Explorer → Planner → Coordinator 完整链路
+4. **文件路径约定** — 短期/长期上下文的目录结构和命名规则
+5. **Explorer 产出格式** — 研究总结、术语表、公式目录的 JSON Schema
+6. **Planner 产出格式** — 约束分析、分镜建议的 JSON Schema
+7. **Coordinator 产出格式** — 讲解脚本、分镜主表、会话交接的 JSON Schema
+8. **通用信封格式** — 所有上下文文件的统一封装结构
+9. **优雅降级规则** — PDF 缺失、LLM 不可用等场景的处理方式
+10. **版本兼容性** — 向前兼容策略
 
 ### 关键设计
 
+- **输入摄取层**（新增）：纯工具层，不写 runtime，返回 Python dataclass 给 Explorer
 - Explorer 和 Planner 产出写入 `runtime/sessions/<session_id>/`（短期上下文），符合 read_only 角色约束
 - Coordinator 产出写入 `runtime/projects/<project_id>/`（长期上下文），下游 Worker 直接消费
 - 所有 JSON 使用统一信封 `{key, scope, writer_role, session_id, content}`
@@ -111,10 +115,10 @@ Phase 0 为以下并行工作提供了接口契约：
 
 | 组 | 依赖 Phase 0 的哪些产出 |
 |----|------------------------|
-| 输入摄取组 (A1, A2) | L3 目录结构 |
+| 输入摄取组 (A1, A2) | L3 目录结构 + L2.1 SourceBundle/PaperContent/NoteContent/AssetList/EnvReport格式约定 |
 | LLM 封装 (C2) | L1 的 `LlmClientProtocol` |
 | 上下文 IO (B2) | L1 的 `_read_context` / `_write_context` 签名 |
-| Explorer 组 (B1) | L1 的 `BaseAgent` + L2 的产出格式 |
+| Explorer 组 (B1) | L1 的 `BaseAgent` + L2 的产出格式 + L2.1 的 SourceBundle |
 | Planner 组 (C1) | L1 的 `BaseAgent` + L2 的产出格式 |
 | Coordinator 组 (D1, D2) | L1 的 `BaseAgent` + L2 的产出格式 |
 
