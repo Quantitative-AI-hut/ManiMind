@@ -2,7 +2,15 @@ import os
 from pypdf import PdfReader
 from typing import Optional, List
 from datetime import datetime
+from dataclasses import dataclass
 
+@dataclass
+class PaperContent:
+    path: str                       # 原始PDF路径
+    exists: bool                    # 文件是否存在
+    text: Optional[str] | None       # 全文本（包括公式LaTeX）
+    extracted_at: datetime          # 提取时间
+    parse_warnings: List[str] = []   # 解析警告（如编码问题、公式可能混排）
 
 class PDFTextExtractor:
     """PDF 文本提取器（支持中文编码和 LaTeX 公式混排）
@@ -15,12 +23,14 @@ class PDFTextExtractor:
 
     def __init__(self, path: str):
         self.path = path
-        self.exists = os.path.exists(path)  # 检查文件是否存在
+        self.note = PaperContent(path=path)
+        self.note.exists = os.path.exists(path)  # 检查文件是否存在
+        self.note.extracted_at = datetime.now() 
+
         self.text: Optional[str] = None          # 提取的全文本
-        self.extracted_at = datetime.now()
         self.parse_warnings: List[str] = []      # 解析警告列表
         
-
+    #return raw_text  # 返回原文本 ,相当于对文本加工
     def _fix_encoding(self, raw_text: str) -> str:
         """尝试修复编码问题（如 GBK 乱码）
         
@@ -46,6 +56,7 @@ class PDFTextExtractor:
                 )
                 return raw_text  # 返回原文本
 
+    #主函数
     def extract_text(self) -> None:
         """提取 PDF 全文本（包括 LaTeX 公式）
         
@@ -60,7 +71,7 @@ class PDFTextExtractor:
             full_text = ""
             
             for page_num, page in enumerate(reader.pages, start=1):
-                raw_text = page.extract_text()
+                raw_text = page.extract_text()  #reader内置函数，得到某一页的内容
                 if not raw_text:
                     self.parse_warnings.append(
                         f"第 {page_num} 页: 可能包含图片/公式（无法提取为文本）"

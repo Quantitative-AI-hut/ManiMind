@@ -24,7 +24,6 @@ class MarkdownReader:
     def __init__(self, file_path: str):
         self.file_path = file_path
         self.note = MarkdownNote(path=file_path)
-        self.read(self)
 
     # return body_text, front_matter
     def _parse_yaml_front_matter(self, content: str) -> Tuple[str, Dict[str, Any]]:
@@ -74,6 +73,7 @@ class MarkdownReader:
         file_name = os.path.basename(self.file_path)
         self.note.title = os.path.splitext(file_name)[0].replace("_", " ").title()
 
+    #主函数
     def read(self) -> MarkdownNote:
         """读取并解析 Markdown 文件"""
         try:
@@ -103,8 +103,8 @@ class MarkdownReader:
 
 # 使用示例
 if __name__ == "__main__":
-  
 
     # 读取笔记
-    note = MarkdownReader("test.md")
+    reader = MarkdownReader("test.md")
+    note = reader.read()
     print(note)
