@@ -2,17 +2,17 @@ import os
 import re
 import yaml
 from typing import Any, Dict, List, Optional, Tuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
 class MarkdownNote:
     """Markdown 笔记数据结构"""
-    path: str                       # 原始笔记路径
-    title: str = ""       # 标题（优先来自 YAML，其次文件名）
-    front_matter: Dict[str, Any] = None  # YAML front matter 内容
-    body_text: str = ""             # 正文文本
-    images: List[str] = None        # 笔记中引用的图片路径
+    path: str                                          # 原始笔记路径
+    title: str = ""                                    # 标题（优先来自 YAML，其次文件名）
+    front_matter: Dict[str, Any] = field(default_factory=dict)  # YAML front matter 内容
+    body_text: str = ""                                # 正文文本
+    images: List[str] = field(default_factory=list)    # 笔记中引用的图片路径
 
 
 class MarkdownReader:
@@ -64,13 +64,12 @@ class MarkdownReader:
     #这个倒是直接加上去了self.note.title
     def _infer_title(self) -> None:
         """推断标题（优先 YAML，其次文件名）"""
-        # # 1. 从 YAML front matter 获取
-        if self.note.front_matter and self.note.front_matter["title"]:
-            self.note.title = str(self.note.front_matter["title"])
+        fm_title = self.note.front_matter.get("title")
+        if fm_title:
+            self.note.title = str(fm_title)
             return
-        
-        # 2. 从文件名提取（移除扩展名）
-        self.note.title = os.path.splitext(self.file_path)[0]
+
+        self.note.title = os.path.splitext(os.path.basename(self.file_path))[0]
 
     #主函数
     def read(self) -> MarkdownNote:
