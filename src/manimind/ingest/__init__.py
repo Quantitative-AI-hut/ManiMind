@@ -1,21 +1,21 @@
 """输入摄取层 — PDF 解析、笔记读取、资产扫描、环境检测。"""
 
-from dataclasses import dataclass,field
-from markdown_reader import MarkdownNote, MarkdownReader
+from dataclasses import dataclass, field
+from typing import List
 
-from typing import  List
-__all__: list[str] = ["markdown_reader"]
+from .markdown_reader import MarkdownNote, MarkdownReader
+
+__all__: list[str] = ["markdown_reader", "SourceBundle", "load_source_bundle"]
+
 
 @dataclass
 class SourceBundle:
     """输入摄取层的统一输出，给Explorer使用。"""
-    #  paper: PaperContent | None      # 论文内容，若无则None      =>难得要死
-    notes: List[MarkdownNote] =field(default_factory=list)        # 笔记列表
+    notes: List[MarkdownNote] = field(default_factory=list)
 
-def load_source_bundle(pdPaths):
+
+def load_source_bundle(note_paths: List[str]) -> SourceBundle:
     result = SourceBundle()
-
-    for pdPath in pdPaths:
-        result.notes.append(MarkdownReader(pdPath).read())
-
+    for path in note_paths:
+        result.notes.append(MarkdownReader(path).read())
     return result
