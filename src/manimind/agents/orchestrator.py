@@ -10,8 +10,12 @@ from ..ingest.pdf_reader import PaperContent
 from ..models import PipelineStage
 from .base import LlmClientProtocol
 from .explorer import ExplorerAgent
+from .html_worker import HtmlWorkerAgent
+from .manim_worker import ManimWorkerAgent
 from .planner import PlannerAgent
+from .svg_worker import SvgWorkerAgent
 from .coordinator import CoordinatorAgent
+from .reviewer import ReviewerAgent
 
 
 @dataclass
@@ -75,6 +79,7 @@ class Orchestrator:
                 PipelineStage.SUMMARIZE,
                 PipelineStage.PLAN,
                 PipelineStage.DISPATCH,
+                PipelineStage.REVIEW,
             ]
 
         result = PipelineResult(
@@ -210,10 +215,35 @@ class Orchestrator:
                 "coordinator": coord_result,
             }
 
-        # ---- DISPATCH: Coordinator 任务分发 ----
+        # ---- DISPATCH: Coordinator 任务分发 + 三个 Worker 并行渲染 ----
         if stage == PipelineStage.DISPATCH:
             coordinator = CoordinatorAgent(self.plan, self.llm_client, self.session_id)
-            return coordinator.run(PipelineStage.DISPATCH, "dispatch.tasks")
+            coord_result = coordinator.run(PipelineStage.DISPATCH, "dispatch.tasks")
+
+            if not coord_result.get("success"):
+                return coord_result
+
+            worker_results = {}
+            html_worker = HtmlWorkerAgent(self.plan, self.llm_client, self.session_id)
+            worker_results["html"] = html_worker.run(PipelineStage.DISPATCH, "render.html")
+
+            manim_worker = ManimWorkerAgent(self.plan, self.llm_client, self.session_id)
+            worker_results["manim"] = manim_worker.run(PipelineStage.DISPATCH, "render.manim")
+
+            svg_worker = SvgWorkerAgent(self.plan, self.llm_client, self.session_id)
+            worker_results["svg"] = svg_worker.run(PipelineStage.DISPATCH, "render.svg")
+
+            return {
+                "success": True,
+                "task_id": "dispatch.combined",
+                "coordinator": coord_result,
+                "workers": worker_results,
+            }
+
+        # ---- REVIEW: 审核所有产物 ----
+        if stage == PipelineStage.REVIEW:
+            reviewer = ReviewerAgent(self.plan, self.llm_client, self.session_id)
+            return reviewer.run(PipelineStage.REVIEW, "review.outputs")
 
         return {"success": False, "error": f"Unknown stage: {stage.value}"}
 

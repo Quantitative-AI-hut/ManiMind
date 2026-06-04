@@ -75,7 +75,7 @@ def test_orchestrator_pipeline_all_stages() -> None:
     assert result.project_id == "test-project"
     assert result.session_id == "test-session"
     # 即使 LLM 返回无效数据，编排器也不会崩溃，只标记失败
-    assert result.stage_count == 5
+    assert result.stage_count == 6
     assert result.error_count > 0
 
 
@@ -88,7 +88,7 @@ def test_orchestrator_creates_agents() -> None:
     # 无 LLM 时不应崩溃
     result = orchestrator.run()
     assert result.project_id == "test-project"
-    assert result.stage_count == 5
+    assert result.stage_count == 6
 
 
 def test_orchestrator_with_null_llm_handles_gracefully() -> None:
@@ -100,7 +100,7 @@ def test_orchestrator_with_null_llm_handles_gracefully() -> None:
     result = orchestrator.run()
 
     assert result.success is False
-    assert result.stage_count == 5
+    assert result.stage_count == 6
     # 每个阶段应该都因为 llm_unavailable 而失败
     for stage_result in result.stage_results:
         err = stage_result.get("error", "")
