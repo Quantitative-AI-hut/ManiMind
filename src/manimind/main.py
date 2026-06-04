@@ -25,6 +25,20 @@ from .workflow import build_project_plan
 DEFAULT_SESSION_ID = "manual-session"
 
 
+def _get_llm_client(args) -> object | None:
+    """根据命令行参数创建 LLM 客户端（如果提供了 API key）。"""
+    api_key = getattr(args, "llm_api_key", None)
+    if not api_key:
+        import os
+        api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        return None
+    from .llm.client import LlmClient
+    base_url = getattr(args, "llm_base_url", None) or os.environ.get("OPENAI_BASE_URL")
+    model = getattr(args, "llm_model", None) or os.environ.get("MANIMIND_MODEL", "gpt-4o")
+    return LlmClient(api_key=api_key, base_url=base_url or None, model=model)
+
+
 def _load_manifest(manifest_path: Path) -> dict:
     """加载项目清单。"""
     return json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -129,6 +143,29 @@ def main() -> None:
         help="任务更新对应的会话标识",
     )
 
+    # ---- agent-run: 运行单个 Agent ----
+    agent_parser = subparsers.add_parser("agent-run", help="运行单个 Agent")
+    agent_parser.add_argument("manifest", type=Path)
+    agent_parser.add_argument("--role", type=str, required=True,
+                              choices=["explorer", "planner", "coordinator"])
+    agent_parser.add_argument("--stage", type=str, required=True)
+    agent_parser.add_argument("--session-id", type=str, default=DEFAULT_SESSION_ID)
+    agent_parser.add_argument("--paper-path", type=str, default=None)
+    agent_parser.add_argument("--note-path", type=str, action="append", default=None)
+    agent_parser.add_argument("--llm-api-key", type=str, default=None)
+    agent_parser.add_argument("--llm-base-url", type=str, default=None)
+    agent_parser.add_argument("--llm-model", type=str, default=None)
+
+    # ---- pipeline-run: 运行完整 Pipeline ----
+    pipeline_parser = subparsers.add_parser("pipeline-run", help="运行完整 Pipeline")
+    pipeline_parser.add_argument("manifest", type=Path)
+    pipeline_parser.add_argument("--session-id", type=str, default=DEFAULT_SESSION_ID)
+    pipeline_parser.add_argument("--paper-path", type=str, default=None)
+    pipeline_parser.add_argument("--note-path", type=str, action="append", default=None)
+    pipeline_parser.add_argument("--llm-api-key", type=str, default=None)
+    pipeline_parser.add_argument("--llm-base-url", type=str, default=None)
+    pipeline_parser.add_argument("--llm-model", type=str, default=None)
+
     args = parser.parse_args()
 
     if args.command == "bootstrap":
@@ -219,6 +256,64 @@ def main() -> None:
                 indent=2,
             )
         )
+        return
+
+
+    if args.command == "agent-run":
+        plan = _build_plan_model_from_manifest(args.manifest)
+        llm_client = _get_llm_client(args)
+        stage = PipelineStage(args.stage)
+        role = args.role
+        task_id = f"{role}.{stage.value}"
+
+        if role == "explorer":
+            from .agents.explorer import ExplorerAgent
+            agent = ExplorerAgent(plan, llm_client=llm_client, session_id=args.session_id)
+        elif role == "planner":
+            from .agents.planner import PlannerAgent
+            agent = PlannerAgent(plan, llm_client=llm_client, session_id=args.session_id)
+        elif role == "coordinator":
+            from .agents.coordinator import CoordinatorAgent
+            agent = CoordinatorAgent(plan, llm_client=llm_client, session_id=args.session_id)
+        else:
+            raise SystemExit(f"Unknown role: {role}")
+
+        # 加载输入源
+        paper_text = None
+        notes = None
+        if args.paper_path:
+            from .ingest.pdf_reader import PdfReader
+            paper = PdfReader(args.paper_path).read()
+            paper_text = paper.text if paper.exists else None
+        if args.note_path:
+            from .ingest.markdown_reader import MarkdownReader
+            notes = []
+            for p in args.note_path:
+                note = MarkdownReader(p).read()
+                notes.append({"title": note.title, "body_text": note.body_text})
+
+        result = agent.run(stage, task_id, paper_text=paper_text, notes=notes)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+
+    if args.command == "pipeline-run":
+        plan = _build_plan_model_from_manifest(args.manifest)
+        llm_client = _get_llm_client(args)
+        from .agents.orchestrator import Orchestrator
+        orchestrator = Orchestrator(plan, llm_client=llm_client, session_id=args.session_id)
+        result = orchestrator.run(
+            paper_path=args.paper_path,
+            note_paths=args.note_path,
+        )
+        output = {
+            "success": result.success,
+            "project_id": result.project_id,
+            "session_id": result.session_id,
+            "stage_count": result.stage_count,
+            "error_count": result.error_count,
+            "stage_results": result.stage_results,
+        }
+        print(json.dumps(output, ensure_ascii=False, indent=2))
         return
 
 

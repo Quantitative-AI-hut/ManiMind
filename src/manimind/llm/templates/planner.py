@@ -33,7 +33,7 @@ def build_summarize_user_message(
         parts.extend([
             "",
             "## 研究总结",
-            json.dumps(research_summary, ensure_ascii=False, indent=2),
+            json.dumps(default=str, obj=research_summary, ensure_ascii=False, indent=2),
         ])
     else:
         parts.extend([
@@ -46,7 +46,7 @@ def build_summarize_user_message(
         parts.extend([
             "",
             "## 术语表",
-            json.dumps(glossary, ensure_ascii=False, indent=2),
+            json.dumps(default=str, obj=glossary, ensure_ascii=False, indent=2),
         ])
     else:
         parts.extend([
@@ -59,7 +59,7 @@ def build_summarize_user_message(
         parts.extend([
             "",
             "## 公式目录",
-            json.dumps(formula_catalog, ensure_ascii=False, indent=2),
+            json.dumps(default=str, obj=formula_catalog, ensure_ascii=False, indent=2),
         ])
     else:
         parts.extend([
@@ -72,7 +72,7 @@ def build_summarize_user_message(
         parts.extend([
             "",
             "## 风格指南",
-            json.dumps(style_guide, ensure_ascii=False, indent=2),
+            json.dumps(default=str, obj=style_guide, ensure_ascii=False, indent=2),
         ])
     else:
         parts.extend([
@@ -137,7 +137,7 @@ def build_plan_user_message(
         parts.extend([
             "",
             "## 镜头清单",
-            json.dumps(segments, ensure_ascii=False, indent=2),
+            json.dumps(default=str, obj=segments, ensure_ascii=False, indent=2),
         ])
     else:
         parts.extend([
@@ -150,7 +150,7 @@ def build_plan_user_message(
         parts.extend([
             "",
             "## 约束分析结果",
-            json.dumps(constraint_analysis, ensure_ascii=False, indent=2),
+            json.dumps(default=str, obj=constraint_analysis, ensure_ascii=False, indent=2),
         ])
     else:
         parts.extend([
@@ -163,28 +163,28 @@ def build_plan_user_message(
         parts.extend([
             "",
             "## 研究总结",
-            json.dumps(research_summary, ensure_ascii=False, indent=2),
+            json.dumps(default=str, obj=research_summary, ensure_ascii=False, indent=2),
         ])
 
     if glossary:
         parts.extend([
             "",
             "## 术语表",
-            json.dumps(glossary, ensure_ascii=False, indent=2),
+            json.dumps(default=str, obj=glossary, ensure_ascii=False, indent=2),
         ])
 
     if formula_catalog:
         parts.extend([
             "",
             "## 公式目录",
-            json.dumps(formula_catalog, ensure_ascii=False, indent=2),
+            json.dumps(default=str, obj=formula_catalog, ensure_ascii=False, indent=2),
         ])
 
     if assets:
         parts.extend([
             "",
             "## 可用资产",
-            json.dumps(assets, ensure_ascii=False, indent=2),
+            json.dumps(default=str, obj=assets, ensure_ascii=False, indent=2),
         ])
 
     parts.extend([

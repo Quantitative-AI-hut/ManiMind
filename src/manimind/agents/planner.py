@@ -93,8 +93,8 @@ class PlannerAgent(BaseAgent):
             }
 
         # 写入短期上下文（Planner 是 read_only，只能写短期）
-        constraint_key = f"{pid}.constraint.analysis"
-        feasibility_key = f"{pid}.feasibility.assessment"
+        constraint_key = "planner.constraint.analysis"
+        feasibility_key = "planner.feasibility.assessment"
 
         self._write_context(
             constraint_key, result["constraint_analysis"], ContextScope.SHORT_TERM
@@ -124,7 +124,7 @@ class PlannerAgent(BaseAgent):
         # 从 kwargs 或 runtime 读取输入
         segments = [s.to_dict() for s in self.plan.segments]
         constraint_analysis = kwargs.get("constraint_analysis") or self._read_context(
-            f"{pid}.constraint.analysis"
+            "planner.constraint.analysis"
         )
         research_summary = kwargs.get("research_summary") or self._read_context(
             f"{pid}.research.summary"
@@ -162,7 +162,7 @@ class PlannerAgent(BaseAgent):
             }
 
         # 写入短期上下文
-        key = f"{pid}.storyboard.suggestions"
+        key = "planner.storyboard.suggestions"
         self._write_context(key, result["storyboard_suggestions"], ContextScope.SHORT_TERM)
 
         return {

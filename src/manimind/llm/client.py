@@ -9,7 +9,17 @@ from __future__ import annotations
 import json
 import os
 import time
+from pathlib import Path
 from typing import Any
+
+# 自动加载项目根目录的 .env 文件
+try:
+    from dotenv import load_dotenv
+    _env_path = Path(__file__).resolve().parent.parent.parent.parent / ".env"
+    if _env_path.exists():
+        load_dotenv(_env_path)
+except ImportError:
+    pass
 
 try:
     from openai import OpenAI, APIError, APIConnectionError, RateLimitError
@@ -182,9 +192,9 @@ class LlmClient:
                 try:
                     result = json.loads(content)
                     if not isinstance(result, dict):
-                        raise ValueError(f"Expected dict, got {type(result).__name__}")
+                        raise RuntimeError(f"Expected dict, got {type(result).__name__}")
                     return result
-                except json.JSONDecodeError as e:
+                except (json.JSONDecodeError, ValueError) as e:
                     raise RuntimeError(
                         f"Failed to parse LLM response as JSON: {e}\n"
                         f"Response preview: {content[:500]}"

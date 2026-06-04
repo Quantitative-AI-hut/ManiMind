@@ -41,6 +41,14 @@ def mock_openai_json_response():
     return mock_response
 
 
+def _make_connection_error(message: str = "Connection failed"):
+    """创建一个 APIConnectionError，兼容新版 openai 库的 request 参数。"""
+    from openai import APIConnectionError
+
+    mock_request = MagicMock()
+    return APIConnectionError(message=message, request=mock_request)
+
+
 # ============================================================================
 # 初始化测试
 # ============================================================================
@@ -48,7 +56,7 @@ def mock_openai_json_response():
 
 def test_llm_client_init_with_env():
     """测试从环境变量初始化 LLM 客户端。"""
-    with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}):
+    with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key", "MANIMIND_MODEL": "gpt-4o"}):
         client = LlmClient()
         assert client.api_key == "test-key"
         assert client.model == "gpt-4o"  # 默认模型
@@ -122,8 +130,8 @@ def test_chat_retry_on_connection_error(mock_openai_response):
         mock_instance = MagicMock()
         # 前两次失败，第三次成功
         mock_instance.chat.completions.create.side_effect = [
-            APIConnectionError(message="Connection failed"),
-            APIConnectionError(message="Connection failed"),
+            _make_connection_error("Connection failed"),
+            _make_connection_error("Connection failed"),
             mock_openai_response,
         ]
         MockOpenAI.return_value = mock_instance
@@ -271,13 +279,9 @@ def test_chat_structured_uses_json_object_format(mock_openai_json_response):
 
 def test_max_retries_exhausted():
     """测试重试次数耗尽时抛出异常。"""
-    from openai import APIConnectionError
-
     with patch("manimind.llm.client.OpenAI") as MockOpenAI:
         mock_instance = MagicMock()
-        mock_instance.chat.completions.create.side_effect = APIConnectionError(
-            message="Always fails"
-        )
+        mock_instance.chat.completions.create.side_effect = _make_connection_error("Always fails")
         MockOpenAI.return_value = mock_instance
 
         client = LlmClient(api_key="test-key", max_retries=2, retry_delay=0.01)
@@ -302,7 +306,7 @@ def test_real_api_call():
         system_prompt="你是一个助手。",
         user_message="请回复'测试成功'。",
         temperature=0.1,
-        max_tokens=10,
+        max_tokens=50,
     )
     assert isinstance(result, str)
     assert len(result) > 0
