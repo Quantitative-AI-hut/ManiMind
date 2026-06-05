@@ -139,6 +139,8 @@ class LlmClient:
         system_prompt: str,
         user_message: str,
         output_schema: dict[str, Any],
+        temperature: float = 0.1,
+        max_tokens: int = 8192,
     ) -> dict[str, Any]:
         """发送结构化输出请求（强制 JSON 格式）。
 
@@ -179,8 +181,8 @@ class LlmClient:
                         {"role": "system", "content": enhanced_system_prompt},
                         {"role": "user", "content": enhanced_user_message},
                     ],
-                    temperature=0.1,  # 结构化输出使用低温度
-                    max_tokens=8192,
+                    temperature=temperature,  # 结构化输出使用低温度
+                    max_tokens=max_tokens,
                     response_format={"type": "json_object"},  # OpenAI JSON 模式
                 )
 

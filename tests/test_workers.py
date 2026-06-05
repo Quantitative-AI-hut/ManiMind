@@ -29,7 +29,7 @@ class MockLlmClient:
         self.calls.append({"method": "chat"})
         return "mock"
 
-    def chat_structured(self, system_prompt: str, user_message: str, output_schema: dict[str, Any]) -> dict[str, Any]:
+    def chat_structured(self, system_prompt: str, user_message: str, output_schema: dict[str, Any], **kwargs: Any) -> dict[str, Any]:
         self.calls.append({"method": "chat_structured", "user_message": user_message[:200]})
         return self._default_response
 
