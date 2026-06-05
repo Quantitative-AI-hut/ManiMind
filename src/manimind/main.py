@@ -39,6 +39,20 @@ def _get_llm_client(args) -> object | None:
     return LlmClient(api_key=api_key, base_url=base_url or None, model=model)
 
 
+def _get_code_llm_client() -> object | None:
+    """创建代码生成 LLM 客户端（从 CODE_LLM_* 环境变量）。"""
+    import os
+    api_key = os.environ.get("CODE_LLM_API_KEY")
+    if not api_key:
+        return None
+    from .llm.client import LlmClient
+    return LlmClient(
+        api_key=api_key,
+        base_url=os.environ.get("CODE_LLM_BASE_URL"),
+        model=os.environ.get("CODE_LLM_MODEL", "gemini-2.5-pro"),
+    )
+
+
 def _load_manifest(manifest_path: Path) -> dict:
     """加载项目清单。"""
     return json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -299,8 +313,9 @@ def main() -> None:
     if args.command == "pipeline-run":
         plan = _build_plan_model_from_manifest(args.manifest)
         llm_client = _get_llm_client(args)
+        code_llm = _get_code_llm_client()
         from .agents.orchestrator import Orchestrator
-        orchestrator = Orchestrator(plan, llm_client=llm_client, session_id=args.session_id)
+        orchestrator = Orchestrator(plan, llm_client=llm_client, code_llm_client=code_llm, session_id=args.session_id)
         result = orchestrator.run(
             paper_path=args.paper_path,
             note_paths=args.note_path,

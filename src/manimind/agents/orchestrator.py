@@ -50,10 +50,12 @@ class Orchestrator:
         self,
         plan,
         llm_client: LlmClientProtocol | None = None,
+        code_llm_client: LlmClientProtocol | None = None,
         session_id: str = "default",
     ):
         self.plan = plan
         self.llm_client = llm_client
+        self.code_llm_client = code_llm_client or llm_client
         self.session_id = session_id
 
     def run(
@@ -224,13 +226,13 @@ class Orchestrator:
                 return coord_result
 
             worker_results = {}
-            html_worker = HtmlWorkerAgent(self.plan, self.llm_client, self.session_id)
+            html_worker = HtmlWorkerAgent(self.plan, self.code_llm_client, self.session_id)
             worker_results["html"] = html_worker.run(PipelineStage.DISPATCH, "render.html")
 
-            manim_worker = ManimWorkerAgent(self.plan, self.llm_client, self.session_id)
+            manim_worker = ManimWorkerAgent(self.plan, self.code_llm_client, self.session_id)
             worker_results["manim"] = manim_worker.run(PipelineStage.DISPATCH, "render.manim")
 
-            svg_worker = SvgWorkerAgent(self.plan, self.llm_client, self.session_id)
+            svg_worker = SvgWorkerAgent(self.plan, self.code_llm_client, self.session_id)
             worker_results["svg"] = svg_worker.run(PipelineStage.DISPATCH, "render.svg")
 
             return {
@@ -242,7 +244,7 @@ class Orchestrator:
 
         # ---- REVIEW: 审核所有产物 ----
         if stage == PipelineStage.REVIEW:
-            reviewer = ReviewerAgent(self.plan, self.llm_client, self.session_id)
+            reviewer = ReviewerAgent(self.plan, self.code_llm_client, self.session_id)
             return reviewer.run(PipelineStage.REVIEW, "review.outputs")
 
         return {"success": False, "error": f"Unknown stage: {stage.value}"}
