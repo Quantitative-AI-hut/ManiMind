@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><title>质数的秘密 - 黎曼猜想科普</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a2e;color:#fff;font-family:'Microsoft YaHei',sans-serif;width:1920px;height:1080px;display:flex;align-items:center;justify-content:center}
+.container{text-align:center}.title{font-size:48px;color:#ffd700;margin-bottom:40px;animation:fadeIn 2s ease}
+.number-line-container{position:relative;width:80%;height:200px;border-bottom:2px solid #4da6ff}
+.prime-dot{position:absolute;width:12px;height:12px;background:#ffd700;border-radius:50%;bottom:-6px;box-shadow:0 0 10px rgba(255,215,0,.6);animation:dotAppear .5s ease forwards;opacity:0}
+.formula{font-size:36px;color:#4da6ff;margin-top:40px;animation:fadeIn 2s ease 1s both}
+.explanation{font-size:24px;color:#ccc;margin-top:20px;animation:fadeIn 2s ease 1.5s both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes dotAppear{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}</style></head>
+<body><div class="container"><div class="title">质数的秘密</div>
+<div class="number-line-container" id="numberLine"></div>
+<div class="formula">π(x) ~ x / ln(x)</div>
+<div class="explanation">质数看似随机，但密度的下降规律可以被精确预测</div></div>
+<script>const primes=[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97];
+const line=document.getElementById('numberLine');
+primes.forEach((p,i)=>{const dot=document.createElement('div');dot.className='prime-dot';dot.style.left=(p/100*100)+'%';dot.style.animationDelay=(i*.08)+'s';line.appendChild(dot)});
+for(let i=0;i<=100;i+=10){const t=document.createElement('div');t.style.cssText=`position:absolute;left:${i}%;bottom:-10px;width:1px;height:10px;background:#4da6ff80`;line.appendChild(t)}</script></body></html>

@@ -1,0 +1,187 @@
+{
+  "project_id": "riemann-zeta-intro",
+  "title": "黎曼猜想入门科普",
+  "narration_script": {
+    "project_title": "黎曼猜想入门科普",
+    "language": "zh-CN",
+    "segments": [
+      {
+        "segment_id": "seg-01",
+        "title": "问题引入：质数的秘密",
+        "narration": "数字的世界里，有一类特殊的数——质数。2、3、5、7、11……它们只能被1和自身整除，像散落在数轴上的宝石。几千年来，数学家一直在寻找质数的规律。它们看起来随机无序，但真的毫无规律吗？高斯在15岁时就发现：质数虽然稀疏，但稀疏的速度是可以预测的。这个发现，把我们引向了数学史上最著名的一个未解之谜——黎曼猜想。",
+        "key_message": "质数分布存在统计规律，引出黎曼猜想的历史意义",
+        "estimated_seconds": 25
+      },
+      {
+        "segment_id": "seg-02",
+        "title": "ζ 函数：连接质数的桥梁",
+        "narration": "1859年，黎曼提出了一个看似简单的函数：ζ(s) 等于所有自然数的 s 次方倒数之和。这个级数最初只在 s 大于 1 时收敛。但黎曼发现，通过一种叫做「解析延拓」的技术，我们可以把这个函数光滑地扩展到整个复平面。奇妙的是：这个函数的零点竟然和质数的分布有着精确的对应关系。黎曼计算了一些零点后发现，它们似乎都落在一条直线上：实部等于二分之一的临界线。他猜测：所有非平凡的零点都在这里。这就是黎曼猜想。",
+        "key_message": "ζ 函数定义 → 解析延拓 → 零点与质数的关系 → 猜想陈述",
+        "estimated_seconds": 35
+      }
+    ],
+    "voiceover_notes": {
+      "total_estimated_duration_seconds": 60,
+      "tone": "沉稳清晰，略带悬念感",
+      "pacing": "前慢后紧，制造悬念后逐步揭示核心内容"
+    }
+  },
+  "storyboard_master": {
+    "project_title": "黎曼猜想入门科普",
+    "total_segments": 2,
+    "segments": [
+      {
+        "segment_id": "seg-01",
+        "title": "问题引入：质数的秘密",
+        "modality": "html",
+        "estimated_seconds": 25,
+        "scene_notes": [
+          "【0-5s】黑底，质数 2,3,5,7,11 逐个浮现，带微光效果",
+          "【5-12s】数轴从 0 延伸到 100，质数位置用金色圆点标注",
+          "【12-18s】叠加蓝色曲线 x/ln(x)，展示质数密度的统计规律",
+          "【18-25s】画面缩小，出现高斯头像简笔画 → 过渡到黎曼 1859"
+        ],
+        "formulas": [
+          "\\pi(x) \\sim \\frac{x}{\\ln x}"
+        ],
+        "color_palette": "深空蓝背景 #0a0a2e，金色质数点 #ffd700，蓝色曲线 #4da6ff"
+      },
+      {
+        "segment_id": "seg-02",
+        "title": "ζ 函数：连接质数的桥梁",
+        "modality": "hybrid",
+        "estimated_seconds": 35,
+        "scene_notes": [
+          "【0-8s】Manim 三维动画：ζ 函数在复平面上的曲面",
+          "【8-14s】动画展示「解析延拓」——曲面平滑扩展",
+          "【14-22s】临界线 Re(s)=1/2 用红色标注，零点以闪烁亮点出现",
+          "【22-30s】分屏：左侧零点分布，右侧 π(x) 误差波动图",
+          "【30-35s】标题字幕：「黎曼猜想——数学皇冠上的明珠」"
+        ],
+        "formulas": [
+          "\\zeta(s)=\\sum_{n=1}^{\\infty}\\frac{1}{n^s}",
+          "\\Re(s)=\\frac{1}{2}"
+        ],
+        "color_palette": "深空蓝背景，红色临界线 #ff3333，零点亮白"
+      }
+    ]
+  },
+  "research_summary": {
+    "topic": "黎曼猜想（Riemann Hypothesis）入门科普",
+    "domain": "数论 / 复分析",
+    "difficulty_level": "beginner",
+    "core_concepts": [
+      {
+        "name": "质数分布",
+        "description": "质数在自然数中的分布看似随机，但存在统计规律。高斯和勒让德发现了质数计数函数 π(x) ≈ x/ln(x)。",
+        "visual_suggestion": "数轴动画，逐步高亮质数位置"
+      },
+      {
+        "name": "黎曼 ζ 函数",
+        "description": "ζ(s) = Σ 1/n^s，最初定义在 Re(s)>1 区域。通过解析延拓可扩展到整个复平面。",
+        "visual_suggestion": "三维曲面图，展示 ζ 函数在复平面上的模长分布"
+      },
+      {
+        "name": "解析延拓",
+        "description": "将函数定义域从原始收敛区域扩展到更大区域。",
+        "visual_suggestion": "动画：区域逐步扩展，函数图像平滑延伸"
+      },
+      {
+        "name": "非平凡零点",
+        "description": "黎曼猜想：ζ 函数的所有非平凡零点的实部都等于 1/2。这些零点位于临界线 Re(s)=1/2 上。",
+        "visual_suggestion": "复平面标注：临界线用醒目颜色，零点用点标记"
+      },
+      {
+        "name": "与质数的联系",
+        "description": "黎曼证明了 ζ 函数的零点分布与质数分布之间的精确公式——显式公式。",
+        "visual_suggestion": "对比图：零点分布 vs 质数计数误差图"
+      }
+    ],
+    "key_findings": [
+      "黎曼猜想是数学史上最重要的未解问题之一，Clay 数学研究所悬赏 100 万美元",
+      "已有超过 10 万亿个零点被验证位于临界线上",
+      "黎曼猜想与密码学、量子物理存在深刻联系"
+    ],
+    "historical_context": "1859 年，伯恩哈德·黎曼在当选柏林科学院院士时提交了一篇仅 8 页的论文中提出了这个改变数学史的问题。"
+  },
+  "glossary": {
+    "domain": "数论与复分析",
+    "terms": [
+      {
+        "term": "质数",
+        "definition": "大于 1 且只能被 1 和自身整除的自然数",
+        "latex": null
+      },
+      {
+        "term": "质数计数函数 π(x)",
+        "definition": "不超过 x 的质数个数",
+        "latex": "\\pi(x)"
+      },
+      {
+        "term": "ζ 函数",
+        "definition": "复变函数 ζ(s)=Σ 1/n^s (Re(s)>1)",
+        "latex": "\\zeta(s)=\\sum_{n=1}^{\\infty}\\frac{1}{n^s}"
+      },
+      {
+        "term": "解析延拓",
+        "definition": "将解析函数从原定义域扩展到大区域且保持解析性的技术",
+        "latex": null
+      },
+      {
+        "term": "临界线",
+        "definition": "复平面上 Re(s)=1/2 的直线",
+        "latex": "\\Re(s)=\\frac{1}{2}"
+      },
+      {
+        "term": "非平凡零点",
+        "definition": "ζ 函数在 0<Re(s)<1 带状区域内的零点",
+        "latex": null
+      },
+      {
+        "term": "素数定理",
+        "definition": "π(x) ~ x/ln(x)，描述质数的渐近分布",
+        "latex": "\\pi(x)\\sim\\frac{x}{\\ln x}"
+      }
+    ]
+  },
+  "formula_catalog": {
+    "domain": "数论",
+    "formulas": [
+      {
+        "id": "f1",
+        "latex": "\\zeta(s) = \\sum_{n=1}^{\\infty} \\frac{1}{n^s}, \\quad \\Re(s) > 1",
+        "meaning": "黎曼 ζ 函数的级数定义",
+        "visual_note": "适合逐项展开动画"
+      },
+      {
+        "id": "f2",
+        "latex": "\\pi(x) \\sim \\frac{x}{\\ln x}",
+        "meaning": "素数定理：质数密度的渐近估计",
+        "visual_note": "双曲线对比图"
+      },
+      {
+        "id": "f3",
+        "latex": "\\zeta(s) = 2^s \\pi^{s-1} \\sin\\left(\\frac{\\pi s}{2}\\right) \\Gamma(1-s) \\zeta(1-s)",
+        "meaning": "ζ 函数的函数方程，揭示 s 与 1-s 的对称性",
+        "visual_note": "分步展示，标注对称中心 s=1/2"
+      },
+      {
+        "id": "f4",
+        "latex": "\\Re(s) = \\frac{1}{2}",
+        "meaning": "临界线：黎曼猜想断言所有非平凡零点都在此线上",
+        "visual_note": "复平面动画，垂直线高亮"
+      },
+      {
+        "id": "f5",
+        "latex": "\\operatorname{Li}(x) = \\int_2^x \\frac{dt}{\\ln t}",
+        "meaning": "对数积分，比 x/ln(x) 更精确的 π(x) 近似",
+        "visual_note": "积分面积图示"
+      }
+    ]
+  },
+  "how_to_render": {
+    "manim": "manim -pql riemann_zeta_scenes.py ZetaSurface3D",
+    "html": "直接用浏览器打开 html/ 目录下的文件",
+    "install": "pip install manim && winget install ffmpeg"
+  }
+}
