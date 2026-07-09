@@ -119,6 +119,53 @@ def test_orchestrator_custom_stages() -> None:
     # 不应尝试运行其它阶段
 
 
+def test_orchestrator_dispatch_fails_when_any_worker_fails(monkeypatch) -> None:
+    """DISPATCH 必须把 Worker 失败当成硬阻塞。"""
+
+    from manimind.agents import orchestrator as orchestrator_module
+
+    class FakeCoordinator:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def run(self, *args, **kwargs):
+            return {"success": True}
+
+    class FakeHtmlWorker:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def run(self, *args, **kwargs):
+            return {"success": True}
+
+    class FakeManimWorker:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def run(self, *args, **kwargs):
+            return {"success": False, "error": "render_failed"}
+
+    class FakeSvgWorker:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def run(self, *args, **kwargs):
+            return {"success": True}
+
+    monkeypatch.setattr(orchestrator_module, "CoordinatorAgent", FakeCoordinator)
+    monkeypatch.setattr(orchestrator_module, "HtmlWorkerAgent", FakeHtmlWorker)
+    monkeypatch.setattr(orchestrator_module, "ManimWorkerAgent", FakeManimWorker)
+    monkeypatch.setattr(orchestrator_module, "SvgWorkerAgent", FakeSvgWorker)
+
+    plan = _make_plan()
+    orchestrator = Orchestrator(plan, llm_client=None, session_id="test")
+    result = orchestrator.run(stages=[PipelineStage.DISPATCH])
+
+    assert result.success is False
+    assert result.stage_results[0]["success"] is False
+    assert result.stage_results[0]["failed_workers"] == ["manim"]
+
+
 def test_orchestrator_pipeline_result_structure() -> None:
     """PipelineResult 包含完整输出结构。"""
 

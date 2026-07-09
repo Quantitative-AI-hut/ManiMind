@@ -52,11 +52,13 @@ class Orchestrator:
         llm_client: LlmClientProtocol | None = None,
         code_llm_client: LlmClientProtocol | None = None,
         session_id: str = "default",
+        render_manim_outputs: bool = False,
     ):
         self.plan = plan
         self.llm_client = llm_client
         self.code_llm_client = code_llm_client or llm_client
         self.session_id = session_id
+        self.render_manim_outputs = render_manim_outputs
 
     def run(
         self,
@@ -230,16 +232,26 @@ class Orchestrator:
             worker_results["html"] = html_worker.run(PipelineStage.DISPATCH, "render.html")
 
             manim_worker = ManimWorkerAgent(self.plan, self.code_llm_client, self.session_id)
-            worker_results["manim"] = manim_worker.run(PipelineStage.DISPATCH, "render.manim")
+            worker_results["manim"] = manim_worker.run(
+                PipelineStage.DISPATCH,
+                "render.manim",
+                render_outputs=getattr(self, "render_manim_outputs", False),
+            )
 
             svg_worker = SvgWorkerAgent(self.plan, self.code_llm_client, self.session_id)
             worker_results["svg"] = svg_worker.run(PipelineStage.DISPATCH, "render.svg")
 
+            failed_workers = [
+                name
+                for name, worker_result in worker_results.items()
+                if not worker_result.get("success", False)
+            ]
             return {
-                "success": True,
+                "success": len(failed_workers) == 0,
                 "task_id": "dispatch.combined",
                 "coordinator": coord_result,
                 "workers": worker_results,
+                "failed_workers": failed_workers,
             }
 
         # ---- REVIEW: 审核所有产物 ----

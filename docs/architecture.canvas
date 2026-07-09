@@ -173,6 +173,26 @@
       "color": "3"
     },
     {
+      "id": "node-render-module",
+      "type": "text",
+      "x": -300,
+      "y": 590,
+      "width": 320,
+      "height": 150,
+      "text": "# render/\n\n- Manim CLI 调用\n- 视频路径发现\n- ffmpeg 关键帧证据",
+      "color": "4"
+    },
+    {
+      "id": "node-review-module",
+      "type": "text",
+      "x": 160,
+      "y": 690,
+      "width": 340,
+      "height": 150,
+      "text": "# review/\n\n- 帧质量与跨帧运动\n- 公式-图形绑定\n- 语义颜色一致性",
+      "color": "3"
+    },
+    {
       "id": "node-project-runtime",
       "type": "text",
       "x": 770,
@@ -385,6 +405,38 @@
       "fromSide": "right",
       "toSide": "left",
       "label": "产物引用"
+    },
+    {
+      "id": "edge-roles-render-module",
+      "fromNode": "node-roles",
+      "toNode": "node-render-module",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "label": "Manim evidence"
+    },
+    {
+      "id": "edge-render-module-outputs",
+      "fromNode": "node-render-module",
+      "toNode": "node-outputs",
+      "fromSide": "right",
+      "toSide": "left",
+      "label": "视频与抽帧"
+    },
+    {
+      "id": "edge-render-module-review-module",
+      "fromNode": "node-render-module",
+      "toNode": "node-review-module",
+      "fromSide": "right",
+      "toSide": "left",
+      "label": "证据预检"
+    },
+    {
+      "id": "edge-review-module-runtime-store",
+      "fromNode": "node-review-module",
+      "toNode": "node-runtime-store",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "label": "审核报告"
     },
     {
       "id": "edge-bootstrap-external",

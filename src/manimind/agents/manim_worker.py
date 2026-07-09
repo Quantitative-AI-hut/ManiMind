@@ -5,8 +5,11 @@ from __future__ import annotations
 from typing import Any
 
 from ..llm.templates.manim_worker import DISPATCH_OUTPUT_SCHEMA, build_dispatch_user_message
+from ..llm.templates.style_guide import get_style_prompt
 from ..models import ContextScope, PipelineStage
+from ..render import extract_keyframes, render_manim_scene
 from .base import BaseAgent
+from .code_fixer import auto_fix
 
 
 class ManimWorkerAgent(BaseAgent):
@@ -41,8 +44,10 @@ class ManimWorkerAgent(BaseAgent):
             return {"success": True, "task_id": task_id, "outputs": [], "segment_count": 0}
 
         outputs: list[str] = []
+        render_outputs: list[str] = []
         errors: list[dict] = []
         system_prompt = self._build_system_prompt_text(PipelineStage.DISPATCH)
+        should_render = kwargs.get("render_outputs", False)
 
         # 逐镜头生成，每次只传一个镜头的信息
         for seg in manim_segs:
@@ -56,22 +61,72 @@ class ManimWorkerAgent(BaseAgent):
                 if result.get("manim_segments"):
                     for mseg in result["manim_segments"]:
                         sid = mseg.get("segment_id", seg.get("segment_id", "unknown"))
+                        # Auto-fix common LLM API errors
+                        mseg["scene_code"] = auto_fix(mseg.get("scene_code", ""))
                         key = f"{pid}.manim.{sid}.approved"
                         self._write_context(key, mseg, ContextScope.LONG_TERM)
                         outputs.append(key)
+                        if should_render:
+                            evidence_key, evidence_ok = self._render_segment_evidence(pid, sid, mseg)
+                            if evidence_key:
+                                render_outputs.append(evidence_key)
+                            if not evidence_ok:
+                                errors.append({
+                                    "segment_id": sid,
+                                    "error": "manim_render_evidence_failed",
+                                })
             except RuntimeError as e:
                 errors.append({"segment_id": seg.get("segment_id"), "error": str(e)})
 
         return {
-            "success": len(outputs) > 0 or len(manim_segs) == 0,
+            "success": (
+                (len(outputs) > 0 or len(manim_segs) == 0)
+                and (not should_render or len(errors) == 0)
+            ),
             "task_id": task_id,
             "outputs": outputs,
+            "render_outputs": render_outputs,
             "segment_count": len(outputs),
             "errors": errors if errors else None,
         }
 
     def _build_system_prompt_text(self, stage: PipelineStage) -> str:
         return "\n".join(self.build_system_prompt(stage))
+
+    def _render_segment_evidence(
+        self,
+        project_id: str,
+        segment_id: str,
+        manim_segment: dict[str, Any],
+    ) -> tuple[str, bool]:
+        """Render generated code and store frame evidence for reviewer use."""
+        render_result = render_manim_scene(
+            segment_id=segment_id,
+            scene_code=manim_segment.get("scene_code", ""),
+            scene_class_name=manim_segment.get("scene_class_name", "Scene"),
+            output_dir=self.plan.runtime_layout.output_dir,
+        )
+        frame_result = None
+        if render_result.success and render_result.video_path:
+            frame_result = extract_keyframes(
+                video_path=render_result.video_path,
+                output_dir=(
+                    f"{self.plan.runtime_layout.output_dir}/manim/frames/{segment_id}"
+                ),
+            )
+
+        key = f"{project_id}.manim.{segment_id}.render_evidence"
+        self._write_context(
+            key,
+            {
+                "segment_id": segment_id,
+                "render": render_result.to_dict(),
+                "frames": frame_result.to_dict() if frame_result else None,
+            },
+            ContextScope.LONG_TERM,
+        )
+        frames_ok = frame_result.success if frame_result else False
+        return key, render_result.success and frames_ok
 
 
 def _get_manim_segments(storyboard: dict, narration: dict) -> list[dict]:
@@ -140,7 +195,9 @@ def _build_single_segment_prompt(seg: dict, formula_catalog: dict | None) -> str
         "3. 公式分步展示：每个符号依次 Write/FadeIn，用不同颜色高亮",
         "4. self.wait() 留阅读时间",
         "5. 输出 JSON 格式: {\"manim_segments\": [{\"segment_id\": \"...\", \"title\": \"...\", \"scene_code\": \"...\", \"scene_class_name\": \"...\", \"formulas_displayed\": [...], \"animation_sequence\": [...]}]}",
-        f"6. 代码控制在 40-60 行，简洁有效即可",
+        f"6. 代码控制在 50-80 行，简洁有效即可",
+        "",
+        get_style_prompt(),
     ])
     return "\n".join(parts)
 

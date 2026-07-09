@@ -157,6 +157,87 @@ def main() -> None:
         help="任务更新对应的会话标识",
     )
 
+    audit_parser = subparsers.add_parser(
+        "quality-audit",
+        help="复用确定性审核规则审计已有 Manim 产物与渲染证据",
+    )
+    audit_parser.add_argument("manifest", type=Path)
+    audit_parser.add_argument(
+        "--no-write",
+        action="store_true",
+        help="只打印审计结果，不写入 outputs/<project_id>/quality-audit.json",
+    )
+
+    assemble_parser = subparsers.add_parser(
+        "assemble-video",
+        help="把已通过渲染证据的 Manim 分段视频按清单顺序拼接成预览成片",
+    )
+    assemble_parser.add_argument("manifest", type=Path)
+    assemble_parser.add_argument(
+        "--output-name",
+        type=str,
+        default=None,
+        help="输出文件名，默认 <project_id>-final.mp4",
+    )
+
+    subtitles_parser = subparsers.add_parser(
+        "build-subtitles",
+        help="根据旁白脚本与分段视频真实时长生成 SRT 字幕文件",
+    )
+    subtitles_parser.add_argument("manifest", type=Path)
+    subtitles_parser.add_argument(
+        "--output-name",
+        type=str,
+        default=None,
+        help="输出文件名，默认 <project_id>.srt",
+    )
+
+    mux_subtitles_parser = subparsers.add_parser(
+        "mux-subtitles",
+        help="把 SRT 作为软字幕轨封装进项目 MP4",
+    )
+    mux_subtitles_parser.add_argument("manifest", type=Path)
+    mux_subtitles_parser.add_argument("--video-path", type=Path, default=None)
+    mux_subtitles_parser.add_argument("--subtitle-path", type=Path, default=None)
+    mux_subtitles_parser.add_argument(
+        "--output-name",
+        type=str,
+        default=None,
+        help="输出文件名，默认 <project_id>-final-subtitled.mp4",
+    )
+
+    burn_subtitles_parser = subparsers.add_parser(
+        "burn-subtitles",
+        help="把 SRT 字幕烧录进画面，生成平台通用审看片",
+    )
+    burn_subtitles_parser.add_argument("manifest", type=Path)
+    burn_subtitles_parser.add_argument("--video-path", type=Path, default=None)
+    burn_subtitles_parser.add_argument("--subtitle-path", type=Path, default=None)
+    burn_subtitles_parser.add_argument(
+        "--output-name",
+        type=str,
+        default=None,
+        help="输出文件名，默认 <project_id>-final-burned.mp4",
+    )
+
+    voiceover_parser = subparsers.add_parser(
+        "build-voiceover",
+        help="使用 Windows SAPI 根据旁白脚本生成离线 WAV 旁白",
+    )
+    voiceover_parser.add_argument("manifest", type=Path)
+    voiceover_parser.add_argument("--output-name", type=str, default=None)
+    voiceover_parser.add_argument("--voice-name", type=str, default=None)
+    voiceover_parser.add_argument("--rate", type=int, default=0)
+
+    mux_voiceover_parser = subparsers.add_parser(
+        "mux-voiceover",
+        help="把旁白 WAV 合成进视频，必要时按旁白长度缩放视频节奏",
+    )
+    mux_voiceover_parser.add_argument("manifest", type=Path)
+    mux_voiceover_parser.add_argument("--video-path", type=Path, default=None)
+    mux_voiceover_parser.add_argument("--audio-path", type=Path, default=None)
+    mux_voiceover_parser.add_argument("--output-name", type=str, default=None)
+
     # ---- agent-run: 运行单个 Agent ----
     agent_parser = subparsers.add_parser("agent-run", help="运行单个 Agent")
     agent_parser.add_argument("manifest", type=Path)
@@ -179,6 +260,11 @@ def main() -> None:
     pipeline_parser.add_argument("--llm-api-key", type=str, default=None)
     pipeline_parser.add_argument("--llm-base-url", type=str, default=None)
     pipeline_parser.add_argument("--llm-model", type=str, default=None)
+    pipeline_parser.add_argument(
+        "--render-manim",
+        action="store_true",
+        help="Manim Worker 生成代码后立即渲染视频并抽帧，作为审核证据",
+    )
 
     args = parser.parse_args()
 
@@ -272,6 +358,74 @@ def main() -> None:
         )
         return
 
+    if args.command == "quality-audit":
+        plan = _build_plan_model_from_manifest(args.manifest)
+        from .review import run_quality_audit
+        report = run_quality_audit(plan, write_report=not args.no_write)
+        print(json.dumps(report.to_dict(), ensure_ascii=False, indent=2))
+        return
+
+    if args.command == "assemble-video":
+        plan = _build_plan_model_from_manifest(args.manifest)
+        from .postproduce import assemble_manim_video
+        result = assemble_manim_video(plan, output_name=args.output_name)
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+        return
+
+    if args.command == "build-subtitles":
+        plan = _build_plan_model_from_manifest(args.manifest)
+        from .postproduce import build_subtitle_file
+        result = build_subtitle_file(plan, output_name=args.output_name)
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+        return
+
+    if args.command == "mux-subtitles":
+        plan = _build_plan_model_from_manifest(args.manifest)
+        from .postproduce import mux_subtitle_track
+        result = mux_subtitle_track(
+            plan,
+            video_path=args.video_path,
+            subtitle_path=args.subtitle_path,
+            output_name=args.output_name,
+        )
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+        return
+
+    if args.command == "burn-subtitles":
+        plan = _build_plan_model_from_manifest(args.manifest)
+        from .postproduce import burn_subtitle_track
+        result = burn_subtitle_track(
+            plan,
+            video_path=args.video_path,
+            subtitle_path=args.subtitle_path,
+            output_name=args.output_name,
+        )
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+        return
+
+    if args.command == "build-voiceover":
+        plan = _build_plan_model_from_manifest(args.manifest)
+        from .postproduce import build_voiceover_audio
+        result = build_voiceover_audio(
+            plan,
+            output_name=args.output_name,
+            voice_name=args.voice_name,
+            rate=args.rate,
+        )
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+        return
+
+    if args.command == "mux-voiceover":
+        plan = _build_plan_model_from_manifest(args.manifest)
+        from .postproduce import mux_voiceover_track
+        result = mux_voiceover_track(
+            plan,
+            video_path=args.video_path,
+            audio_path=args.audio_path,
+            output_name=args.output_name,
+        )
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+        return
 
     if args.command == "agent-run":
         plan = _build_plan_model_from_manifest(args.manifest)
@@ -315,7 +469,13 @@ def main() -> None:
         llm_client = _get_llm_client(args)
         code_llm = _get_code_llm_client()
         from .agents.orchestrator import Orchestrator
-        orchestrator = Orchestrator(plan, llm_client=llm_client, code_llm_client=code_llm, session_id=args.session_id)
+        orchestrator = Orchestrator(
+            plan,
+            llm_client=llm_client,
+            code_llm_client=code_llm,
+            session_id=args.session_id,
+            render_manim_outputs=args.render_manim,
+        )
         result = orchestrator.run(
             paper_path=args.paper_path,
             note_paths=args.note_path,
