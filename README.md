@@ -76,6 +76,14 @@ powershell -ExecutionPolicy Bypass -File .\scripts\check-prerequisites.ps1
 - `task-update <manifest.json> <task_id> <status> <actor_role>`：按状态机推进任务。
 - `context-pack` 默认会阻断角色非法阶段请求；需要显式放行时使用 `--allow-disallowed-stage`。
 - 三个命令支持 `--session-id`，并会把状态与事件日志落盘到 `runtime/projects/<project_id>/` 与 `runtime/sessions/<session_id>/`。
+- `pipeline-run <manifest.json> --render-manim`：在 Manim Worker 生成代码后立即渲染视频并抽取关键帧，作为审核 Agent 的视频级证据来源；渲染、抽帧、黑屏、低对比、低细节、跨帧几乎无运动、缺少解释性动画信号、公式缺少视觉 companion 或跨镜头变量颜色冲突会强制阻塞审核。
+- `quality-audit <manifest.json>`：不调用 LLM，读取已有 Manim 代码与渲染证据，复用确定性审核规则生成 `outputs/<project_id>/quality-audit.json` 与人工审片用的 `outputs/<project_id>/quality-summary.md`。
+- `assemble-video <manifest.json>`：读取长期上下文中的 Manim 渲染证据，按清单镜头顺序拼接分段视频，生成 `outputs/<project_id>/<project_id>-final.mp4`；可用 `--output-name` 指定文件名。
+- `build-subtitles <manifest.json>`：读取旁白脚本和分段视频真实时长，生成 `outputs/<project_id>/<project_id>.srt`。
+- `mux-subtitles <manifest.json>`：把 SRT 作为软字幕轨封装进成片，生成 `outputs/<project_id>/<project_id>-final-subtitled.mp4`。
+- `burn-subtitles <manifest.json>`：把 SRT 烧录进画面，生成平台通用的 `outputs/<project_id>/<project_id>-final-burned.mp4`。
+- `build-voiceover <manifest.json>`：使用 Windows SAPI 根据旁白脚本生成离线 WAV 旁白。
+- `mux-voiceover <manifest.json>`：把旁白合成进烧录字幕版视频；如果旁白和视频时长不一致，会按旁白长度缩放视频节奏。
 
 ## Web API 骨架（新增）
 

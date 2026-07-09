@@ -7,6 +7,8 @@ __pycache__/
 .venv/
 venv/
 env/
+manim_env/
+test_venv/
 
 # Node / frontend
 node_modules/
@@ -30,6 +32,8 @@ outputs/*
 !outputs/.gitkeep
 logs/*
 !logs/.gitkeep
+media/
+ref_frames/
 
 # Media exports
 *.mp4
