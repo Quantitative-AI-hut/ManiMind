@@ -1,0 +1,13 @@
+# This file is used internally by FFMPEG.
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSurface3D/3768848763_1469048106_3961227816.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSurface3D/1294246390_1770312089_1399354380.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSurface3D/1294246390_2158654542_1910619620.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSurface3D/1294246390_4048732434_3743518997.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSurface3D/1294246390_422628456_1669798290.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSurface3D/1294246390_2230700224_366085715.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSurface3D/1294246390_1306756696_4268919644.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSurface3D/1294246390_1121617232_1626374720.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSurface3D/1294246390_987511085_139519443.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSurface3D/1294246390_3792159137_768846319.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSurface3D/1294246390_2005305742_2899279021.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSurface3D/1294246390_2628855022_2148905535.mp4'

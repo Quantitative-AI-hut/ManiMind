@@ -1,0 +1,12 @@
+# This file is used internally by FFMPEG.
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSeriesIntro/1584795214_2598896050_223132457.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSeriesIntro/4072820271_2738178818_2495823292.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSeriesIntro/4072820271_1839128356_3257551211.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSeriesIntro/4072820271_2853311202_1027462475.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSeriesIntro/4072820271_3757547443_2542917822.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSeriesIntro/4072820271_3987867795_2886636066.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSeriesIntro/4072820271_2546735686_4221481233.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSeriesIntro/4072820271_2385049999_2244912675.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSeriesIntro/4072820271_541154014_3219678322.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSeriesIntro/4072820271_2408024828_2597274512.mp4'
+file 'file:D:/ManiMind/outputs/riemann-zeta-intro/media/videos/riemann_zeta_scenes/480p15/partial_movie_files/ZetaSeriesIntro/4072820271_1137644083_2048942578.mp4'
